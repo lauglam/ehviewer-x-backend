@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use visdom::Vis;
-use crate::parser::ParseError;
-use crate::structures::GalleryTagGroup;
+use crate::{parser::ParseError, structures::GalleryTagGroup};
 
 impl ToString for GalleryTagGroup {
     fn to_string(&self) -> String {

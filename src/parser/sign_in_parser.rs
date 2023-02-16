@@ -1,8 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::structures::SignIn;
-
+use crate::{parser::{ParseError, REGEX_MATCH_FAILED}, structures::SignIn};
 
 impl FromStr for SignIn {
     type Err = ParseError;

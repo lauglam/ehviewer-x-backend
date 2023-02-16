@@ -1,7 +1,5 @@
 use std::str::FromStr;
-use crate::eh_config;
-use crate::parser::ParseError;
-use crate::structures::Category;
+use crate::{eh_config, structures::Category, parser::ParseError};
 
 trait IgnoreCase {
     fn contains_ignore_case(&self, x: &str) -> bool;

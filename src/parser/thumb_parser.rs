@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::structures::Thumb;
+use crate::{parser::{ParseError, REGEX_MATCH_FAILED}, structures::Thumb};
 
 impl FromStr for Thumb {
     type Err = ParseError;
@@ -10,8 +9,8 @@ impl FromStr for Thumb {
         let regex = Regex::new(PATTERN_THUMB).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
 
-        let height = captures[1].parse()?;
-        let width = captures[2].parse()?;
+        let height = captures[1].parse::<u32>()?;
+        let width = captures[2].parse::<u32>()?;
         let src = String::from(&captures[3]);
 
         Ok(Thumb {

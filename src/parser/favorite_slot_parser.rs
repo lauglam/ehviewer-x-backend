@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{OUT_OF_RANGE, REGEX_MATCH_FAILED, ParseError};
-use crate::structures::FavoriteSlot;
+use crate::{parser::{OUT_OF_RANGE, REGEX_MATCH_FAILED, ParseError}, structures::FavoriteSlot};
 
 impl FromStr for FavoriteSlot {
     type Err = ParseError;

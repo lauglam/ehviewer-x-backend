@@ -2,8 +2,7 @@
 
 use std::str::FromStr;
 use visdom::Vis;
-use crate::parser::ParseError;
-use crate::structures::EventPane;
+use crate::{parser::ParseError, structures::EventPane};
 
 impl FromStr for EventPane {
     type Err = ParseError;

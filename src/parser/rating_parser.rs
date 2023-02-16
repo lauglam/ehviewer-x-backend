@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::structures::Rating;
+use crate::{parser::{ParseError, REGEX_MATCH_FAILED}, structures::Rating};
 
 impl FromStr for Rating {
     type Err = ParseError;
@@ -14,11 +13,11 @@ impl FromStr for Rating {
         let mut value = 5 as f32;
         let mut ms = reg.find_iter(s);
         if let Some(m) = ms.next() {
-            n1 = m.as_str().replace("px", "").parse()?;
+            n1 = m.as_str().replace("px", "").parse::<i32>()?;
         }
 
         if let Some(m) = ms.next() {
-            n2 = m.as_str().replace("px", "").parse()?;
+            n2 = m.as_str().replace("px", "").parse::<i32>()?;
         }
 
         if n1 != i32::MIN && n2 != i32::MIN {

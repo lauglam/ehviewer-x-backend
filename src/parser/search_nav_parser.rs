@@ -1,8 +1,7 @@
 use std::str::FromStr;
 use regex::Regex;
 use visdom::Vis;
-use crate::parser::{ATTRIBUTE_NOT_FOUND, ParseError, REGEX_MATCH_FAILED};
-use crate::structures::SearchNav;
+use crate::{parser::{ATTRIBUTE_NOT_FOUND, ParseError, REGEX_MATCH_FAILED}, structures::SearchNav};
 
 impl FromStr for SearchNav {
     type Err = ParseError;

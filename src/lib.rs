@@ -1,8 +1,5 @@
 mod eh_url;
-mod eh_client;
-mod eh_request;
 mod settings;
-mod eh_task;
 mod eh_engine;
 mod parser;
 mod test_helper;
@@ -13,6 +10,7 @@ mod structures;
 pub enum EhError {
     ParseError(parser::ParseError),
     EngineError(reqwest::Error),
+    FromServerError(parser::ParseError),
 }
 
 impl std::fmt::Display for EhError {
@@ -20,6 +18,7 @@ impl std::fmt::Display for EhError {
         match self {
             EhError::ParseError(e) => e.fmt(f),
             EhError::EngineError(e) => e.fmt(f),
+            EhError::FromServerError(e) => e.fmt(f),
         }
     }
 }
@@ -29,6 +28,15 @@ impl std::error::Error for EhError {}
 impl From<reqwest::Error> for EhError {
     fn from(value: reqwest::Error) -> Self {
         EhError::EngineError(value)
+    }
+}
+
+impl From<parser::ParseError> for EhError {
+    fn from(value: parser::ParseError) -> Self {
+        match value {
+            parser::ParseError::FromServer(_) => EhError::FromServerError(value),
+            _ => EhError::ParseError(value),
+        }
     }
 }
 

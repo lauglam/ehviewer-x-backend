@@ -1,8 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::parser::unescape::unescape;
-use crate::structures::GalleryPage;
+use crate::{parser::{ParseError, REGEX_MATCH_FAILED, unescape::unescape}, structures::GalleryPage};
 
 impl FromStr for GalleryPage {
     type Err = ParseError;

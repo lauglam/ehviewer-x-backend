@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::structures::Torrent;
+use crate::{parser::{ParseError, REGEX_MATCH_FAILED}, structures::Torrent};
 
 impl FromStr for Torrent {
     type Err = ParseError;

@@ -1,9 +1,7 @@
 use std::str::FromStr;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::parser::unescape::unescape;
-use crate::structures::GalleryPageApi;
+use crate::{parser::{ParseError, REGEX_MATCH_FAILED, unescape::unescape}, structures::GalleryPageApi};
 
 impl FromStr for GalleryPageApi {
     type Err = ParseError;

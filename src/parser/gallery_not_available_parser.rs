@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use visdom::Vis;
-use crate::parser::ParseError;
-use crate::structures::GalleryNotAvailable;
+use crate::{parser::ParseError, structures::GalleryNotAvailable};
 
 impl FromStr for GalleryNotAvailable {
     type Err = ParseError;

@@ -2,8 +2,12 @@ use std::str::FromStr;
 use regex::Regex;
 use visdom::types::Elements;
 use visdom::Vis;
-use crate::parser::{ATTRIBUTE_NOT_FOUND, EhParseResult, ParseError, REGEX_MATCH_FAILED};
-use crate::structures::{Category, FavoriteSlot, GalleryDetailUrl, GalleryInfoCompact, GalleryInfoExtended, GalleryInfoMinimal, GalleryInfoMinimalPlus, GalleryInfoSet, GalleryInfoThumbnail, GalleryList, Rating, Thumb};
+use crate::{parser::{ATTRIBUTE_NOT_FOUND, EhParseResult, ParseError, REGEX_MATCH_FAILED},
+            structures::{Category, FavoriteSlot, GalleryDetailUrl, GalleryInfoCompact,
+                         GalleryInfoExtended, GalleryInfoMinimal, GalleryInfoMinimalPlus,
+                         GalleryInfoSet, GalleryInfoThumbnail, GalleryList, Rating,
+                         SearchNav, Thumb},
+};
 
 impl FromStr for GalleryList {
     type Err = ParseError;
@@ -11,7 +15,7 @@ impl FromStr for GalleryList {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let root = Vis::load(s)?;
         let nav = root.find(r#".searchnav"#).eq(0);
-        let search_nav = nav.outer_html().parse()?;
+        let search_nav = nav.outer_html().parse::<SearchNav>()?;
 
         let selector = r#".searchnav select[onchange*=inline_set] > option[selected]"#;
         let selected = root.find(selector).last();
@@ -20,35 +24,66 @@ impl FromStr for GalleryList {
         let gallery_info_set = match selected.text().as_str() {
             "Minimal" => {
                 let mut vec = Vec::new();
-                for child in itg.children("tr").slice(1..) {
+                let mut children = itg.children("tr").slice(1..);
+                // if it is not log in, that 14th element of the array is an advertisement
+                if children.length() > 25 {
+                    children = children.slice(..13).add(children.slice(14..));
+                }
+
+                assert_eq!(children.length(), 25);
+                for child in children {
                     vec.push(child.outer_html().parse::<GalleryInfoMinimal>()?);
                 }
                 GalleryInfoSet::Minimal(vec)
             }
             "Minimal+" => {
                 let mut vec = Vec::new();
-                for child in itg.children("tr").slice(1..) {
+                let mut children = itg.children("tr").slice(1..);
+                // if it is not log in, that 14th element of the array is an advertisement
+                if children.length() > 25 {
+                    children = children.slice(..13).add(children.slice(14..));
+                }
+
+                assert_eq!(children.length(), 25);
+                for child in children {
                     vec.push(child.outer_html().parse::<GalleryInfoMinimalPlus>()?);
                 }
                 GalleryInfoSet::MinimalPlus(vec)
             }
             "Compact" => {
                 let mut vec = Vec::new();
-                for child in itg.children("tr").slice(1..) {
+                let mut children = itg.children("tr").slice(1..);
+                // if it is not log in, that 14th element of the array is an advertisement
+                if children.length() > 25 {
+                    children = children.slice(..13).add(children.slice(14..));
+                }
+
+                assert_eq!(children.length(), 25);
+                for child in children {
                     vec.push(child.outer_html().parse::<GalleryInfoCompact>()?);
                 }
                 GalleryInfoSet::Compact(vec)
             }
             "Extended" => {
                 let mut vec = Vec::new();
-                for child in itg.children("tr") {
+                let mut children = itg.children("tr");
+                // if it is not log in, that 14th element of the array is an advertisement
+                if children.length() > 25 {
+                    children = children.slice(..13).add(children.slice(14..));
+                }
+
+                assert_eq!(children.length(), 25);
+                for child in children {
                     vec.push(child.outer_html().parse::<GalleryInfoExtended>()?);
                 }
                 GalleryInfoSet::Extended(vec)
             }
             "Thumbnail" => {
                 let mut vec = Vec::new();
-                for child in itg.children(".gl1t") {
+                let children = itg.children(".gl1t");
+
+                assert_eq!(children.length(), 25);
+                for child in children {
                     vec.push(child.outer_html().parse::<GalleryInfoThumbnail>()?);
                 }
                 GalleryInfoSet::Thumbnail(vec)
@@ -96,17 +131,12 @@ impl FromStr for GalleryInfoMinimal {
     }
 }
 
-impl From<GalleryInfoMinimal> for GalleryInfoMinimalPlus {
-    fn from(value: GalleryInfoMinimal) -> Self {
-        unsafe { std::mem::transmute(value) }
-    }
-}
-
 impl FromStr for GalleryInfoMinimalPlus {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(s.parse::<GalleryInfoMinimal>()?.into())
+        let minimal = s.parse::<GalleryInfoMinimal>()?;
+        Ok(unsafe { std::mem::transmute(minimal) })
     }
 }
 
@@ -275,7 +305,7 @@ fn parse_pages_1_2_3(root: &Elements) -> EhParseResult<u32> {
     let regex = Regex::new(PATTERN_PAGES).unwrap();
     let captures = regex.captures(&sibling_str).ok_or(REGEX_MATCH_FAILED)?;
 
-    Ok(captures[1].parse()?)
+    Ok(captures[1].parse::<u32>()?)
 }
 
 fn parse_pages_4(root: &Elements) -> EhParseResult<u32> {
@@ -285,7 +315,7 @@ fn parse_pages_4(root: &Elements) -> EhParseResult<u32> {
     let regex = Regex::new(PATTERN_PAGES).unwrap();
     let captures = regex.captures(&sibling).ok_or(REGEX_MATCH_FAILED)?;
 
-    Ok(captures[1].parse()?)
+    Ok(captures[1].parse::<u32>()?)
 }
 
 fn parse_pages_5(root: &Elements) -> EhParseResult<u32> {
@@ -295,7 +325,7 @@ fn parse_pages_5(root: &Elements) -> EhParseResult<u32> {
     let regex = Regex::new(PATTERN_PAGES).unwrap();
     let captures = regex.captures(&sibling).ok_or(REGEX_MATCH_FAILED)?;
 
-    Ok(captures[1].parse()?)
+    Ok(captures[1].parse::<u32>()?)
 }
 
 fn parse_thumb_1_2_3(root: &Elements) -> EhParseResult<Thumb> {
@@ -355,9 +385,8 @@ fn parse_favorite_name_opt(root: &Elements) -> EhParseResult<Option<String>> {
 }
 
 fn parse_uploader_1_2_3_4(root: &Elements) -> EhParseResult<String> {
-    let prefix = r#"https://e-hentai.org/uploader/"#;
+    let prefix = r#""https://e-hentai.org/uploader/""#;
     let a = root.find(&format!("[href^={}]", prefix));
-
     Ok(a.text())
 }
 

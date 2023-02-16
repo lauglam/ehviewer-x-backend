@@ -1,8 +1,7 @@
 use std::str::FromStr;
 use visdom::Vis;
 use crate::eh_url;
-use crate::parser::{ATTRIBUTE_NOT_FOUND, ParseError};
-use crate::structures::Profile;
+use crate::{parser::{ATTRIBUTE_NOT_FOUND, ParseError}, structures::Profile};
 
 impl FromStr for Profile {
     type Err = ParseError;

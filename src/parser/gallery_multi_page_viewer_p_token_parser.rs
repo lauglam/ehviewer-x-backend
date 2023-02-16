@@ -1,7 +1,5 @@
 use std::str::FromStr;
-use crate::parser::input::Input;
-use crate::parser::ParseError;
-use crate::structures::GalleryMultiPageViewerPToken;
+use crate::{parser::{ParseError, input::Input}, structures::GalleryMultiPageViewerPToken};
 
 impl FromStr for GalleryMultiPageViewerPToken {
     type Err = ParseError;

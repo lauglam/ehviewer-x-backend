@@ -1,6 +1,5 @@
 use std::str::FromStr;
-use crate::parser::ParseError;
-use crate::structures::GalleryTokenList;
+use crate::{parser::ParseError, structures::GalleryTokenList};
 
 impl FromStr for GalleryTokenList {
     type Err = ParseError;

@@ -1,9 +1,6 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::{CONCAT, eh_url};
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::structures::GalleryPageUrl;
-
+use crate::{CONCAT, eh_url, parser::{ParseError, REGEX_MATCH_FAILED}, structures::GalleryPageUrl};
 
 impl FromStr for GalleryPageUrl {
     type Err = ParseError;
@@ -15,7 +12,7 @@ impl FromStr for GalleryPageUrl {
         let regex = Regex::new(URL_STRICT_PATTERN).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
         let p_token = String::from(&captures[1]);
-        let gid = captures[2].parse()?;
+        let gid = captures[2].parse::<u64>()?;
         let page = captures[3].parse::<u32>()? - 1;
 
         Ok(GalleryPageUrl {

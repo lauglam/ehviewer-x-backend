@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use visdom::Vis;
-use crate::parser::{ParseError, SIGN_IN_REQUIRED};
-use crate::structures::Favorite;
+use crate::{parser::{ParseError, SIGN_IN_REQUIRED}, structures::{Favorite, GalleryList, SearchNav}};
 
 impl FromStr for Favorite {
     type Err = ParseError;
@@ -28,8 +27,8 @@ impl FromStr for Favorite {
         }
 
         let nav = root.find(r#".searchnav"#).eq(0);
-        let search_nav = nav.outer_html().parse()?;
-        let gallery_list = s.parse()?;
+        let search_nav = nav.outer_html().parse::<SearchNav>()?;
+        let gallery_list = s.parse::<GalleryList>()?;
 
         Ok(Favorite {
             search_nav,

@@ -1,19 +1,23 @@
 #[derive(Debug, PartialEq, Clone)]
 pub struct Settings {
-    gallery_site: GallerySites,
+    site: GallerySites,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Settings {
-            gallery_site: GallerySites::E,
+            site: GallerySites::E,
         }
     }
 }
 
 impl Settings {
-    pub fn gallery_site(&self) -> GallerySites {
-        self.gallery_site
+    pub fn new() -> Settings {
+        Settings::default()
+    }
+
+    pub fn site(&self) -> GallerySites {
+        self.site
     }
 }
 

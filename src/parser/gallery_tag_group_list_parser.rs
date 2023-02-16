@@ -1,7 +1,6 @@
 use std::str::FromStr;
 use visdom::Vis;
-use crate::parser::ParseError;
-use crate::structures::{GalleryTagGroup, GalleryTagGroupList};
+use crate::{parser::ParseError, structures::{GalleryTagGroup, GalleryTagGroupList}};
 
 impl FromStr for GalleryTagGroupList {
     type Err = ParseError;

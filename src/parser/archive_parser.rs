@@ -1,8 +1,9 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::parser::{ParseError, REGEX_MATCH_FAILED};
-use crate::parser::unescape::unescape;
-use crate::structures::{Archive, ArchiveItem};
+use crate::{
+    structures::{Archive, ArchiveItem},
+    parser::{ParseError, REGEX_MATCH_FAILED, unescape::unescape},
+};
 
 impl FromStr for Archive {
     type Err = ParseError;

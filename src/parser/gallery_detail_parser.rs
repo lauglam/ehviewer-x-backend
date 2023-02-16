@@ -4,9 +4,12 @@ use std::str::FromStr;
 use chrono::DateTime;
 use regex::Regex;
 use visdom::Vis;
-use crate::parser::{ATTRIBUTE_NOT_FOUND, DOM_NOT_FOUND, ParseError, REGEX_MATCH_FAILED};
-use crate::parser::unescape::unescape;
-use crate::structures::{Category, FavoriteSlot, GalleryComment, GalleryCommentList, GalleryDetail, GalleryDetailDetail, GalleryDetailUrl, GalleryPreviewLarge, GalleryPreviewMedium, GalleryPreviewSet, GalleryTagGroupList};
+use crate::{
+    parser::{ATTRIBUTE_NOT_FOUND, DOM_NOT_FOUND, ParseError, REGEX_MATCH_FAILED, unescape::unescape},
+    structures::{Category, FavoriteSlot, GalleryComment, GalleryCommentList, GalleryDetail,
+                 GalleryDetailDetail, GalleryDetailUrl, GalleryPreviewLarge, GalleryPreviewMedium,
+                 GalleryPreviewSet, GalleryTagGroupList},
+};
 
 impl FromStr for GalleryDetail {
     type Err = ParseError;
@@ -27,15 +30,15 @@ impl FromStr for GalleryDetail {
 
         let regex = Regex::new(PATTERN_DETAIL).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
-        let gid = captures[1].parse()?;
-        let api_uid = captures[5].parse()?;
+        let gid = captures[1].parse::<u64>()?;
+        let api_uid = captures[5].parse::<u64>()?;
         let token = String::from(&captures[3]);
         let api_key = String::from(&captures[7]);
 
         let regex = Regex::new(PATTERN_TORRENT).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
         let torrent_url = String::from(unescape(&captures[1]));
-        let torrent_count = captures[2].parse()?;
+        let torrent_count = captures[2].parse::<u32>()?;
 
         let regex = Regex::new(PATTERN_ARCHIVE).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
@@ -68,7 +71,7 @@ impl FromStr for GalleryDetail {
         let detail = gdd.html().parse::<GalleryDetailDetail>()?;
 
         let rat = gm.find("#rating_count");
-        let rating_count = rat.text().parse()?;
+        let rating_count = rat.text().parse::<u32>()?;
 
         let label = gm.find("#rating_label");
         let label_text = label.text();
@@ -76,7 +79,7 @@ impl FromStr for GalleryDetail {
         if label_text != "Not Yet Rated" {
             let regex = Regex::new(PATTERN_RATING).unwrap();
             let captures = regex.captures(&label_text).ok_or(REGEX_MATCH_FAILED)?;
-            rating_opt = Some(captures[1].parse()?);
+            rating_opt = Some(captures[1].parse::<f32>()?);
         }
 
         let gdf = gm.find("#gdf");
@@ -116,7 +119,7 @@ impl FromStr for GalleryDetail {
         let comment_list = c_div.outer_html().parse::<GalleryCommentList>()?;
 
         let last_page = root.find(".ptt td:nth-last-child(2) > a");
-        let preview_pages = last_page.text().parse()?;
+        let preview_pages = last_page.text().parse::<u32>()?;
 
         let first_page = root.find(".ptt td:nth-child(2) > a");
         let href = first_page.attr("href").ok_or(ATTRIBUTE_NOT_FOUND)?;
@@ -225,7 +228,7 @@ impl FromStr for GalleryComment {
 
         // c0 is uploader comment. cannot vote.
         // id.
-        let id = captures[1].parse()?;
+        let id = captures[1].parse::<u64>()?;
 
         let c3 = root.find(".c3");
         let posted = c3.text();
@@ -294,7 +297,7 @@ impl FromStr for GalleryComment {
 
             // score_opt.
             let span = root.find(&format!(r#".c5 #comment_score_{}"#, id));
-            score_opt = Some(span.text()[1..].parse()?);
+            score_opt = Some(span.text()[1..].parse::<u32>()?);
         }
 
 
@@ -427,7 +430,7 @@ impl FromStr for GalleryDetailDetail {
 
                     let regex = Regex::new(PATTERN_PAGES).unwrap();
                     let captures = regex.captures(&gdt2).unwrap();
-                    pages = Some(captures[1].parse()?);
+                    pages = Some(captures[1].parse::<u32>()?);
                 }
                 "Favorited:" => {
                     let gdt2 = gdt1.next_element_sibling().unwrap();
@@ -435,7 +438,7 @@ impl FromStr for GalleryDetailDetail {
 
                     let regex = Regex::new(PATTERN_FAVORITE_COUNT).unwrap();
                     let captures = regex.captures(&gdt2).unwrap();
-                    favorite_count = Some(captures[1].parse()?);
+                    favorite_count = Some(captures[1].parse::<u32>()?);
                 }
                 _ => unreachable!()
             }
@@ -555,10 +558,10 @@ fn parse_medium(s: &str) -> Result<Vec<GalleryPreviewMedium>, ParseError> {
 
     let regex = Regex::new(PATTERN_MEDIUM_PREVIEW).unwrap();
     for cap in regex.captures_iter(s) {
-        let clip_width = cap[1].parse()?;
-        let clip_height = cap[2].parse()?;
+        let clip_width = cap[1].parse::<u32>()?;
+        let clip_height = cap[2].parse::<u32>()?;
         let image_url = String::from(&cap[3]);
-        let offset_x = cap[4].parse()?;
+        let offset_x = cap[4].parse::<u32>()?;
         let offset_y = 0;
         let page_url = String::from(&cap[5]);
         let position = cap[6].parse::<u32>()? - 1;

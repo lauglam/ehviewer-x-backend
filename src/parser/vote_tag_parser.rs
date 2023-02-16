@@ -1,6 +1,5 @@
 use std::str::FromStr;
-use crate::parser::ParseError;
-use crate::structures::VoteTag;
+use crate::{parser::ParseError, structures::VoteTag};
 
 impl FromStr for VoteTag {
     type Err = ParseError;
