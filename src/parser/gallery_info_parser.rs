@@ -109,6 +109,7 @@ impl FromStr for GalleryInfo {
 
         // 13. simple_language_opt
         let simple_language_opt = if let Some(ref simple_tag_vec) = simple_tag_vec_opt {
+            // Compact Extended
             let mut simple_language_opt = None;
             for tag in simple_tag_vec {
                 let idx_opt = S_LANG_TAGS.iter().position(|&t| t == tag);
@@ -119,6 +120,7 @@ impl FromStr for GalleryInfo {
             }
             simple_language_opt
         } else {
+            // Minimal MinimalPlus Thumbnail
             let link = root.find(r#".glink"#);
             let idx_opt = S_LANG_PATTERNS.iter().position(|pattern| {
                 let regex = Regex::new(pattern).unwrap();

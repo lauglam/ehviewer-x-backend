@@ -1,13 +1,11 @@
-use std::collections::HashMap;
 use reqwest::header;
 use reqwest::header::HeaderMap;
 use crate::{
     EhResult,
     settings::Settings,
     eh_url::{self, EhUrl},
-    structures::{GalleryList, SignIn},
+    structures::{GalleryList, SignIn, GalleryDetail},
 };
-use crate::structures::GalleryDetail;
 
 #[derive(Debug)]
 pub struct EhClient {
@@ -90,9 +88,7 @@ impl EhClient {
             .text()
             .await?;
 
-        let detail = res.parse::<GalleryDetail>()?;
-
-        Ok(detail)
+        Ok(res.parse::<GalleryDetail>()?)
     }
 }
 
