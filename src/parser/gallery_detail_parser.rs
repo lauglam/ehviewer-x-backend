@@ -28,22 +28,33 @@ impl FromStr for GalleryDetail {
             return Err(ParseError::FromServer(String::from(&cap[1])));
         }
 
+        // 1. identity
+        // 2. api_uid
+        // 3. api_key
         let regex = Regex::new(PATTERN_DETAIL).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
+
         let gid = captures[1].parse::<u64>()?;
-        let api_uid = captures[5].parse::<u64>()?;
         let token = String::from(&captures[3]);
+        let identity = GalleryIdentity { gid, token };
+
+        // if you are not log in, that value is -1
+        let api_uid = captures[5].parse::<i64>()?;
         let api_key = String::from(&captures[7]);
 
+        // 4. torrent_url
+        // 5. torrent_count
         let regex = Regex::new(PATTERN_TORRENT).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
         let torrent_url = String::from(unescape(&captures[1]));
         let torrent_count = captures[2].parse::<u32>()?;
 
+        // 6. archive_url
         let regex = Regex::new(PATTERN_ARCHIVE).unwrap();
         let captures = regex.captures(s).ok_or(REGEX_MATCH_FAILED)?;
         let archive_url = String::from(unescape(&captures[1]));
 
+        // 7. thumb
         let root = Vis::load(s)?;
         let gm = root.find(".gm:not(#cdiv)");
 
@@ -54,25 +65,32 @@ impl FromStr for GalleryDetail {
         let captures = regex.captures(&style).ok_or(REGEX_MATCH_FAILED)?;
         let thumb = String::from(&captures[3]);
 
+        // 8. title
         let gn = gm.find("#gn");
         let title = gn.text();
 
+        // 9. title_jpn
         let gj = gm.find("#gj");
         let title_jpn = gj.text();
 
+        // 10. category
         let cs = gm.find("#gdc > .cs");
         let cs = cs.text();
         let category = cs.parse::<Category>()?.value;
 
+        // 11. uploader
         let gdn = gm.find("#gdn");
         let uploader = gdn.text();
 
+        // 12. detail
         let gdd = gm.find("#gdd");
         let detail = gdd.html().parse::<GalleryDetailDetail>()?;
 
+        // 13. rating_count
         let rat = gm.find("#rating_count");
         let rating_count = rat.text().parse::<u32>()?;
 
+        // 14. rating_opt
         let label = gm.find("#rating_label");
         let label_text = label.text();
         let mut rating_opt: Option<f32> = None;
@@ -82,10 +100,13 @@ impl FromStr for GalleryDetail {
             rating_opt = Some(captures[1].parse::<f32>()?);
         }
 
+        // 15. is_favorited
         let gdf = gm.find("#gdf");
         let favorite_link = gdf.find("#favoritelink");
         let is_favorited = !favorite_link.text().contains("Add to Favorites");
 
+        // 16. favorite_slot_opt
+        // 16. favorite_name_opt
         let (favorite_slot_opt, favorite_name_opt) = if is_favorited {
             let i = gdf.find(".i");
             let style = i.attr("style").ok_or(ATTRIBUTE_NOT_FOUND)?;
@@ -96,6 +117,7 @@ impl FromStr for GalleryDetail {
             (None, None)
         };
 
+        // 18. newer_version_map_opt
         let gnd = root.find("#gnd");
         let newer_version_map_opt = if !gnd.is_empty() {
             let regex = Regex::new(PATTERN_NEWER_DATE).unwrap();
@@ -115,33 +137,37 @@ impl FromStr for GalleryDetail {
             None
         };
 
+        // 19. comment_list
         let c_div = root.find("#cdiv");
         let comment_list = c_div.outer_html().parse::<GalleryCommentList>()?;
 
+        // 20. preview_pages
         let last_page = root.find(".ptt td:nth-last-child(2) > a");
         let preview_pages = last_page.text().parse::<u32>()?;
 
+        // 21. url
         let first_page = root.find(".ptt td:nth-child(2) > a");
         let href = first_page.attr("href").ok_or(ATTRIBUTE_NOT_FOUND)?;
         let url = href.to_string();
 
+        // 22. preview_set
         let gdo4 = root.find("#gdo4");
-        let can_click = gdo4.children("[onclick]");
+        let selected = gdo4.children(".ths");
 
         let gdt = root.find("#gdt");
-        let preview_set = match can_click.text().as_str() {
+        let preview_set = match selected.text().as_str() {
             "Large" => GalleryPreviewSet::Large(parse_large(&gdt.outer_html())?),
             "Normal" => GalleryPreviewSet::Medium(parse_medium(&gdt.outer_html())?),
             _ => unreachable!(),
         };
 
+        // 23. tag_group_vec
         let tag_list = root.find("#taglist");
         let tag_group_list = tag_list.outer_html().parse::<GalleryTagGroupList>()?;
         let tag_group_vec = tag_group_list.group_vec;
 
         Ok(GalleryDetail {
-            gid,
-            token,
+            identity,
             api_uid,
             api_key,
             torrent_count,
@@ -587,7 +613,7 @@ fn parse_medium(s: &str) -> Result<Vec<GalleryPreviewMedium>, ParseError> {
 const OFFENSIVE_STRING: &str = "<p>(And if you choose to ignore this warning, you lose all rights to complain about it in the future.)</p>";
 const PINING_STRING: &str = "<p>This gallery_list is pining for the fjords.</p>";
 const PATTERN_ERROR: &str = "<div class=\"d\">\n<p>([^<]+)</p>";
-const PATTERN_DETAIL: &str = "var gid = (\\d+);\\s*?(\n|\r|\r\n)?\\s*?var token = \"([a-f0-9]+)\";\\s*?(\n|\r|\r\n)?\\s*?var apiuid = ([\\-\\d]+);\\s*?(\n|\r|\r\n)?\\s*?var apikey = \"([a-f0-9]+)\";";
+const PATTERN_DETAIL: &str = r#"var gid = (\d+);\s*?(\n|\r|\r\n)?\s*?var token = "([a-f0-9]+)";\s*?(\n|\r|\r\n)?\s*?var apiuid = ([\-\d]+);\s*?(\n|\r|\r\n)?\s*?var apikey = "([a-f0-9]+)";"#;
 const PATTERN_TORRENT: &str = r#"<a[^<>]*onclick="return popUp\('([^']+)'[^)]+\)">Torrent Download[^<]+(\d+)[^<]+</a"#;
 const PATTERN_ARCHIVE: &str = r#"<a[^<>]*onclick="return popUp\('([^']+)'[^)]+\)">Archive Download</a>"#;
 const PATTERN_RATING: &str = r#"[+-]?([0-9]*[.]?[0-9]+)"#;

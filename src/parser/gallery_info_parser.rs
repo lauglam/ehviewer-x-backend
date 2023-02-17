@@ -13,25 +13,25 @@ impl FromStr for GalleryInfo {
         let root = Vis::load(s)?;
 
         // 1. identity
-        let e_gl_name = root.find(r#".glname"#);
-        let mut e_a = e_gl_name.find("a");
-        if e_a.is_empty() {
+        let gl_name = root.find(r#".glname"#);
+        let mut a = gl_name.find("a");
+        if a.is_empty() {
             // Extended
-            e_a = e_gl_name.parent("a");
+            a = gl_name.parent("a");
         }
 
-        let href = e_a.attr("href").ok_or(ATTRIBUTE_NOT_FOUND)?;
+        let href = a.attr("href").ok_or(ATTRIBUTE_NOT_FOUND)?;
         let identity = href.to_string().parse::<GalleryIdentity>()?;
 
         // 2. simple_tag_vec_opt
-        let e_gt_vec = root.find(r#".glname .gt"#);
-        let simple_tag_vec_opt = if e_gt_vec.is_empty() {
+        let gts = root.find(r#".glname .gt"#);
+        let simple_tag_vec_opt = if gts.is_empty() {
             // Minimal MinimalPlus Thumbnail
             None
         } else {
             let mut simple_tag_vec = Vec::new();
-            for e_gt in e_gt_vec {
-                let title_attr = e_gt.get_attribute("title").ok_or(ATTRIBUTE_NOT_FOUND)?;
+            for gt in gts {
+                let title_attr = gt.get_attribute("title").ok_or(ATTRIBUTE_NOT_FOUND)?;
                 simple_tag_vec.push(title_attr.to_string());
             }
 
@@ -39,19 +39,19 @@ impl FromStr for GalleryInfo {
         };
 
         // 3. category
-        let mut e_cs_or_cn = root.find(".gl1m > .cs");
-        if e_cs_or_cn.is_empty() {
+        let mut cs_or_cn = root.find(".gl1m > .cs");
+        if cs_or_cn.is_empty() {
             // Compact Extended
-            e_cs_or_cn = root.find(".cn");
+            cs_or_cn = root.find(".cn");
         }
 
-        let category = e_cs_or_cn.text().parse::<Category>()?;
+        let category = cs_or_cn.text().parse::<Category>()?;
         let category = category.value;
 
         // 4. pages
         // Tips: Minimal MinimalPlus Compact in `.glthumb div:contains('pages')`
-        let e_div = root.find(r#"div:contains('pages')"#);
-        let pages = e_div.text();
+        let div = root.find(r#"div:contains('pages')"#);
+        let pages = div.text();
 
         let regex = Regex::new(PATTERN_PAGES).unwrap();
         let captures = regex.captures(&pages).ok_or(REGEX_MATCH_FAILED)?;
@@ -60,26 +60,26 @@ impl FromStr for GalleryInfo {
 
         // 5. thumb
         // Tips: Minimal MinimalPlus Compact in `.glthumb img`
-        let e_img = root.find("img");
-        let thumb = e_img.outer_html().parse::<Thumb>()?;
+        let img = root.find("img");
+        let thumb = img.outer_html().parse::<Thumb>()?;
 
         // 6. rating
         // Tips: Minimal MinimalPlus Compact in `.glthumb .ir`
-        let e_ir = root.find(r#".ir"#).eq(0);
-        let style = e_ir.attr("style").ok_or(ATTRIBUTE_NOT_FOUND)?;
+        let ir = root.find(r#".ir"#).eq(0);
+        let style = ir.attr("style").ok_or(ATTRIBUTE_NOT_FOUND)?;
 
         let rating = style.to_string().parse::<Rating>()?;
         let rating = rating.value;
 
         // 7. posted
-        let e_div = root.find("[id^=posted_]");
-        let posted = e_div.text();
+        let div = root.find("[id^=posted_]");
+        let posted = div.text();
 
         // 8. is_favorited
-        let is_favorited = e_div.attr("style").is_some();
+        let is_favorited = div.attr("style").is_some();
 
         // 9. favorite_slot_opt
-        let favorite_slot_opt = if let Some(style) = e_div.attr("style") {
+        let favorite_slot_opt = if let Some(style) = div.attr("style") {
             let favorite_slot = style.to_string().parse::<FavoriteSlot>()?;
             Some(favorite_slot.value)
         } else {
@@ -87,7 +87,7 @@ impl FromStr for GalleryInfo {
         };
 
         // 10. favorite_name_opt
-        let favorite_name_opt = if let Some(title) = e_div.attr("title") {
+        let favorite_name_opt = if let Some(title) = div.attr("title") {
             Some(title.to_string())
         } else {
             None
@@ -95,17 +95,17 @@ impl FromStr for GalleryInfo {
 
         // 11. uploader_opt
         let prefix = r#""https://e-hentai.org/uploader/""#;
-        let e_a = root.find(&format!("[href^={}]", prefix));
+        let a = root.find(&format!("[href^={}]", prefix));
 
-        let uploader_opt = if e_a.is_empty() {
+        let uploader_opt = if a.is_empty() {
             None
         } else {
-            Some(e_a.text())
+            Some(a.text())
         };
 
         // 12. title
-        let e_div = root.find(r#".glink"#);
-        let title = e_div.text();
+        let div = root.find(r#".glink"#);
+        let title = div.text();
 
         // 13. simple_language_opt
         let simple_language_opt = if let Some(ref simple_tag_vec) = simple_tag_vec_opt {

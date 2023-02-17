@@ -1,17 +1,17 @@
 use std::collections::HashMap;
-use crate::structures::{GalleryDetailUrl, GalleryTagGroup};
+use crate::structures::{GalleryIdentity, GalleryTagGroup};
 
 #[derive(Debug, PartialEq)]
 pub struct GalleryDetail {
-    pub gid: u64,
-    pub token: String,
-    pub api_uid: u64,
+    pub identity: GalleryIdentity,
+    /// If you are not log in, that value is -1.
+    pub api_uid: i64,
     pub api_key: String,
     pub torrent_count: u32,
     pub torrent_url: String,
     pub archive_url: String,
     pub thumb: String,
-    pub newer_version_map_opt: Option<HashMap<String, GalleryDetailUrl>>,
+    pub newer_version_map_opt: Option<HashMap<String, GalleryIdentity>>,
     pub is_favorited: bool,
     pub favorite_name_opt: Option<String>,
     pub favorite_slot_opt: Option<u32>,

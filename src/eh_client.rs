@@ -1,9 +1,13 @@
+use std::collections::HashMap;
+use reqwest::header;
+use reqwest::header::HeaderMap;
 use crate::{
     EhResult,
     settings::Settings,
     eh_url::{self, EhUrl},
     structures::{GalleryList, SignIn},
 };
+use crate::structures::GalleryDetail;
 
 #[derive(Debug)]
 pub struct EhClient {
@@ -28,6 +32,8 @@ impl EhClient {
 
     pub async fn sign_in(&self, username: &str, password: &str) -> EhResult<SignIn> {
         let referer = "https://forums.e-hentai.org/index.php?act=Login&CODE=0";
+        let origin = "https://forums.e-hentai.org";
+        ;
 
         let params = [
             ("referer", referer),
@@ -38,8 +44,14 @@ impl EhClient {
             ("CookieDate", "1"),
         ];
 
+        let mut headers = HeaderMap::from_iter([
+            (header::REFERER, referer.parse().unwrap()),
+            (header::ORIGIN, origin.parse().unwrap())
+        ]);
+
         let res = self.client
             .post(eh_url::API_SIGN_IN)
+            .headers(headers)
             .form(&params)
             .send()
             .await?
@@ -50,16 +62,37 @@ impl EhClient {
     }
 
     pub async fn get_gallery_list(&self, url: &str) -> EhResult<GalleryList> {
+        let headers = HeaderMap::from_iter([
+            (header::REFERER, self.eh_url.referer().parse().unwrap()),
+        ]);
+
         let res = self.client
             .get(url)
+            .headers(headers)
             .send()
             .await?
             .text()
             .await?;
 
-        let gallery_list = res.parse::<GalleryList>()?;
+        Ok(res.parse::<GalleryList>()?)
+    }
 
-        Ok(gallery_list)
+    pub async fn get_gallery_detail(&self, url: &str) -> EhResult<GalleryDetail> {
+        let headers = HeaderMap::from_iter([
+            (header::REFERER, self.eh_url.referer().parse().unwrap()),
+        ]);
+
+        let res = self.client
+            .get(url)
+            .headers(headers)
+            .send()
+            .await?
+            .text()
+            .await?;
+
+        let detail = res.parse::<GalleryDetail>()?;
+
+        Ok(detail)
     }
 }
 
@@ -103,5 +136,11 @@ mod tests {
     async fn get_gallery_list_test() {
         let engine = EhClient::new();
         assert_eq!(engine.get_gallery_list("https://e-hentai.org").await.is_ok(), true);
+    }
+
+    #[tokio::test]
+    async fn get_gallery_detail_test() {
+        let engine = EhClient::new();
+        assert_eq!(engine.get_gallery_detail("https://e-hentai.org/g/2062067/588c82702b/").await.is_ok(), true);
     }
 }
