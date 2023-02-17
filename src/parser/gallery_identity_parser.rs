@@ -1,8 +1,8 @@
 use std::str::FromStr;
 use regex::Regex;
-use crate::{CONCAT, eh_url, parser::{ParseError, REGEX_MATCH_FAILED}, structures::GalleryDetailUrl};
+use crate::{CONCAT, eh_url, parser::{ParseError, REGEX_MATCH_FAILED}, structures::GalleryIdentity};
 
-impl FromStr for GalleryDetailUrl {
+impl FromStr for GalleryIdentity {
     type Err = ParseError;
 
     /// ```text
@@ -15,7 +15,7 @@ impl FromStr for GalleryDetailUrl {
         let gid = captures[1].parse::<u64>()?;
         let token = String::from(&captures[2]);
 
-        Ok(GalleryDetailUrl { gid, token })
+        Ok(GalleryIdentity { gid, token })
     }
 }
 
@@ -29,6 +29,6 @@ mod tests {
     #[test]
     fn parse_test() {
         let url = "https://e-hentai.org/g/2455981/acc72caed0/";
-        assert_eq!(url.parse::<GalleryDetailUrl>().is_ok(), true);
+        assert_eq!(url.parse::<GalleryIdentity>().is_ok(), true);
     }
 }

@@ -18,14 +18,14 @@ mod gallery_page_url;
 mod gallery_token_api;
 mod gallery_tag_group;
 mod gallery_tag_group_list;
-mod gallery_detail_url;
+mod gallery_identity;
 mod thumb;
 mod rating;
 mod gallery_api;
 mod search_nav;
 mod gallery_list;
 mod gallery_detail;
-mod gallery_info_set;
+mod gallery_info;
 
 pub use {
     category::Category,
@@ -33,7 +33,7 @@ pub use {
     favorite_slot::FavoriteSlot,
     favorites::Favorite,
     forums::Forums,
-    gallery_detail_url::GalleryDetailUrl,
+    gallery_identity::GalleryIdentity,
     gallery_multi_page_viewer_p_token::GalleryMultiPageViewerPToken,
     gallery_not_available::GalleryNotAvailable,
     gallery_page::GalleryPage,
@@ -51,20 +51,12 @@ pub use {
     vote_tag::VoteTag,
     search_nav::SearchNav,
     gallery_list::GalleryList,
+    gallery_info::GalleryInfo
 };
 
 pub use archive::{Archive, ArchiveItem};
 
 pub use gallery_token_api::{GalleryTokenList, GalleryToken};
-
-pub use gallery_info_set::{
-    GalleryInfoSet,
-    GalleryInfoMinimal,
-    GalleryInfoMinimalPlus,
-    GalleryInfoCompact,
-    GalleryInfoExtended,
-    GalleryInfoThumbnail,
-};
 
 pub use gallery_detail::{
     GalleryDetail,

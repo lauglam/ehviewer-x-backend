@@ -7,7 +7,7 @@ use visdom::Vis;
 use crate::{
     parser::{ATTRIBUTE_NOT_FOUND, DOM_NOT_FOUND, ParseError, REGEX_MATCH_FAILED, unescape::unescape},
     structures::{Category, FavoriteSlot, GalleryComment, GalleryCommentList, GalleryDetail,
-                 GalleryDetailDetail, GalleryDetailUrl, GalleryPreviewLarge, GalleryPreviewMedium,
+                 GalleryDetailDetail, GalleryIdentity, GalleryPreviewLarge, GalleryPreviewMedium,
                  GalleryPreviewSet, GalleryTagGroupList},
 };
 
@@ -107,8 +107,8 @@ impl FromStr for GalleryDetail {
             let hrefs = gnd.find("a");
             for (idx, href) in hrefs.into_iter().enumerate() {
                 let href = href.get_attribute("href").ok_or(ATTRIBUTE_NOT_FOUND)?;
-                let detail_url = href.to_string().parse::<GalleryDetailUrl>()?;
-                newer_version_map.insert(date_vec[idx].clone(), detail_url);
+                let identity = href.to_string().parse::<GalleryIdentity>()?;
+                newer_version_map.insert(date_vec[idx].clone(), identity);
             }
             Some(newer_version_map)
         } else {

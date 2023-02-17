@@ -1,7 +1,7 @@
 mod eh_url;
 mod settings;
-mod eh_engine;
-mod parser;
+mod eh_client;
+pub mod parser;
 mod test_helper;
 mod eh_config;
 mod structures;
